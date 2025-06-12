@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+env/
+venv/
+
+# IDE settings
+.idea/
+.vscode/
+
+# Environment & config files
+.env
+*.env
+config.py
+
+# Mac OS system files
+.DS_Store
+
+# Log files
+*.log
+
+# Databases (удали *.db, если хочешь отслеживать базу)
+*.db
+
+# Pytest cache
+.pytest_cache/
