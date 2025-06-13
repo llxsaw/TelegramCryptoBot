@@ -5,7 +5,8 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from services.alerts import add_alert, alert_checker
 from services.coingecko import get_price
-from services.db import get_all_alerts, get_user_alerts
+from services.db import get_all_alerts, get_user_alerts, remove_alert
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 
 router = Router()
 
@@ -40,8 +41,42 @@ async def cmd_alerts_all(message: types.Message):
         await message.answer("У Вас нет активных алертов")
         return
 
-    text = "Ваши активные алерты:\n\n"
     for alert in alerts:
-        coin_id, price = alert
-        text += f"🪙 {coin_id.upper()} — {price}$\n"
-    await message.answer(text)
+        alert_id, coin_id, price = alert
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text='❌ Удалить', callback_data=f"delete_alert:{alert_id}")],
+        ])
+        await message.answer(
+            f"🪙 {coin_id.upper()} — {price}$\nID: {alert_id}",
+            reply_markup=keyboard
+        )
+
+
+
+@router.message(Command('remove'))
+async def cmd_remove(message: types.Message):
+    args = message.text.strip().split()
+    if len(args) != 2 or not args[1].isdigit():
+        await message.answer("❌ Использование: /remove <id>")
+        return
+
+    alert_id = int(args[1])
+    success = await remove_alert(chat_id=message.from_user.id, alert_id=alert_id)
+    if success:
+        await message.answer(f"✅ Оповещение с ID {alert_id} удалено.")
+    else:
+        await message.answer(f"⚠️ Оповещение с ID {alert_id} не найдено.")
+
+
+
+@router.callback_query(lambda c: c.data.startswith("delete_alert:"))
+async def process_delete_callback(callback: CallbackQuery):
+    try:
+        alert_id = int(callback.data.split(":")[1])
+        success = await remove_alert(callback.from_user.id, alert_id)
+        if success:
+            await callback.message.edit_text('Алерт удален')
+        else:
+            await callback.answer('Ошибка', show_alert=True)
+    except Exception as e:
+        await callback.answer(f"Ошибка: {e}", show_alert=True)
