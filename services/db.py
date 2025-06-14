@@ -38,11 +38,11 @@ async def get_all_alerts():
         return await cursor.fetchall()
 
 
-async def remove_alert(chat_id: int, coin_id: str) -> bool:
+async def remove_alert(chat_id: int, alert_id: int) -> bool:
     async with aiosqlite.connect(DB_PATH) as db:
         cursor = await db.execute(
-            "DELETE FROM alerts WHERE chat_id = ? AND coin_id = ?",
-            (chat_id, coin_id)
+            "DELETE FROM alerts WHERE id = ? AND chat_id = ?",
+            (alert_id, chat_id)
         )
         await db.commit()
         return cursor.rowcount > 0
