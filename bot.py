@@ -1,7 +1,7 @@
 import asyncio
 from aiogram import Bot, Dispatcher
 from config import TOKEN
-from handlers import start, top, price, social_links, alerts
+from handlers import start, top, price, social_links, alerts, menu
 from services.db import init_db
 
 
@@ -14,6 +14,7 @@ async def main():
     dp.include_router(price.router)
     dp.include_router(social_links.router)
     dp.include_router(alerts.router)
+    dp.include_router(menu.router)
 
     asyncio.create_task(alerts.alert_checker(bot))
 
